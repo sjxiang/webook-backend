@@ -4,10 +4,7 @@ import "go.uber.org/zap"
 
 
 type UserUsecase struct {
-// storage
-// cache
-// drive
-// token
+	// token
 	ur     UserRepo
 	logger *zap.SugaredLogger
 }
@@ -20,18 +17,11 @@ func NewUserUsecase(ur UserRepo, logger *zap.SugaredLogger) *UserUsecase {
 }
 
 type SocialUsecase struct {
-
+	// 
+	logger *zap.SugaredLogger
 }
 
 
-// // UserRepo 接口，定义了 data 层需要提供的能力，此接口实现者为 data/user.go 文件中的 userRepo
-// type UserRepo interface {
-// 	CreateUser(ctx context.Context, user *User) error
-// 	GetUserByEmail(ctx context.Context, email string) (*User, error)
-// 	GetUserByUsername(ctx context.Context, username string) (*User, error)
-// 	GetUserByID(ctx context.Context, id uint) (*User, error)
-// 	UpdateUser(ctx context.Context, user *User) (*User, error)
-// }
 
 // type ProfileRepo interface {
 // 	GetProfile(ctx context.Context, username string) (*Profile, error)

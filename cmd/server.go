@@ -32,12 +32,13 @@ func NewServer(config *conf.Config, engine *gin.Engine, router *router.Router, l
 
 func (server *Server) Start() {
 	server.logger.Infow("Starting webook-backend...")
-
+	secret := server.config.GetSecretKey()
+	
 	// init
 	gin.SetMode(server.config.ServerMode)
 
 	// init route
-	server.router.RegisterRouters(server.engine)
+	server.router.RegisterRouters(server.engine, secret)
 
 	// run
 	err := server.engine.Run(server.config.ServerHost + ":" + server.config.ServerPort)

@@ -17,10 +17,11 @@ func NewRouter(controller *controller.Controller) *Router {
 }
 
 
-func (r *Router) RegisterRouters(engine *gin.Engine) {
+func (r *Router) RegisterRouters(engine *gin.Engine, secret string) {
 	// config
 	engine.UseRawPath = true
 	// init middleware
+	engine.Use(middleware.Session(secret))
 	engine.Use(middleware.CORS())
 	
 	engine.NoRoute(func(c *gin.Context) {
@@ -38,7 +39,21 @@ func (r *Router) RegisterRouters(engine *gin.Engine) {
 	routerGroup := engine.Group("/api/v1")
 	userGroup := routerGroup.Group("/user")
 
-	userGroup.POST("/signup", r.Controller.Signup)
-	userGroup.POST("/me", r.Controller.Me)
+	{
+		// userGroup.Use(middleware.NewSessionLoginMiddlewareBuilder().IgnorePaths("/api/v1/user/signup", "/api/v1/user/login").Build())
+		userGroup.POST("/signup", r.Controller.Signup)
+		userGroup.POST("/login", r.Controller.Login)
+		// session + cookie 认证
+		// 中间件顺序，不要乱
+		userGroup.Use(middleware.NewSessionLoginMiddlewareBuilder().Build())
+		userGroup.POST("/profile", r.Controller.Profile)
+	}
 	
+
+	// init route
+	otherRouterGroup := engine.Group("/api/v2")
+	otherUserGroup := otherRouterGroup.Group("/user")
+	
+	// jwt 认证
+	otherUserGroup.POST("/signup", nil)
 }

@@ -1,11 +1,13 @@
 package util
 
 import (
-	"testing"
 	"strings"
+	"testing"
+
+	"github.com/stretchr/testify/require"
 )
 
-func TestXxx(t *testing.T) {
+func TestValidate(t *testing.T) {
 	minSize, digit, special, lower, upper := ValidatePassword("hasicoghwif*4YY")
 	if !minSize || !digit || !special || !lower || !upper {
 		t.Log("无效密码")
@@ -29,4 +31,18 @@ func TestXxx(t *testing.T) {
 		
 		t.Log(msg + strings.Join(errs, "，"))
 	}
+}
+
+
+
+func TestEncrypt(t *testing.T) {
+	plainText := "vbwivbvo;079r23"
+	
+	hashedPassword, err := HashPassword(plainText)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	err = CheckPassword(plainText, hashedPassword)
+	require.NoError(t, err)
 }

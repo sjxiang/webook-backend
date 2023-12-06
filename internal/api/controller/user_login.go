@@ -1,97 +1,71 @@
 package controller
 
-
-
 import (
+	"context"
 	"encoding/json"
+	"errors"
 	"net/http"
 
+	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
+	"github.com/sjxiang/webook-backend/internal/xerr"
 )
 
-// 注册
-type SignUp struct {
-	Email           string `json:"email" binding:"required,email"`
-	Password        string `json:"password" binding:"required"`
-	ConfirmPassword string `json:"confirm_password" binding:"required"`
-}
-
-
+// 登录
 type LoginReq struct {
-	Mobile           string `json:"mobile"            validate:"required,min=4,max=32"`
-	VerificationCode string `json:"verification_code" validate:"required,len=6"`
+	Email    string `json:"email"    validate:"required,email"`
+	Password string `json:"password" validate:"required,min=8,max=32"`
+	// VerificationCode string `json:"verification_code" validate:"required,len=6"`
 }
 
-
-type LoginResponse struct {
-
-}
-
-func (resp *LoginResponse) ExportForFeedback() interface{} {
-	return nil 
-}
-
-
-func Login(ctx *gin.Context) {
+func (controller *Controller) Login(ctx *gin.Context) {
+	// fetch payload
 	var req LoginReq
-
 	if err := json.NewDecoder(ctx.Request.Body).Decode(&req); err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": err})
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"message": "请求参数类型不匹配",
+		})
 		return
 	}
 
+	// validate
 	if err := validator.New().Struct(req); err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"message": err.Error(),
+		})
 		return
 	}
 
-	ctx.JSON(http.StatusOK, gin.H{"message": req})
+	// biz handle
+	user, err := controller.uc.Login(context.TODO(), req.Email, req.Password)
+
+	if err != nil {
+		if errors.Is(err, xerr.InvalidUserOrPassword) {
+			ctx.JSON(http.StatusBadRequest, gin.H{
+				"message": "用户名或者密码不正确，请重试",
+			})
+			return
+		}
+
+		controller.logger.Errorf("系统异常", "biz", err)
+		ctx.JSON(http.StatusInternalServerError, gin.H{
+			"message": "系统异常",
+		})
+		return
+	}
+
+	// 设置 session（把碗掏出来，要饭）
+	s := sessions.Default(ctx)
+	s.Clear()
+	s.Set("user_id", user.ID)
+	s.Save()
+
+	// feedback
+	ctx.JSON(http.StatusOK, gin.H{"message": "登录成功"})
 }
 
 
-
-
-// import (
-// 	"gitee.com/geekbang/basic-go/webook/internal/domain"
-// 	"gitee.com/geekbang/basic-go/webook/internal/errs"
-// 	"gitee.com/geekbang/basic-go/webook/internal/service"
-// 	ijwt "gitee.com/geekbang/basic-go/webook/internal/web/jwt"
-// 	"gitee.com/geekbang/basic-go/webook/pkg/ginx"
-// 	regexp "github.com/dlclark/regexp2"
-// 	"github.com/gin-contrib/sessions"
-// 	"github.com/gin-gonic/gin"
-// 	"github.com/golang-jwt/jwt/v5"
-// 	"github.com/google/uuid"
-// 	"go.uber.org/zap"
-// 	"net/http"
-// 	"time"
-// )
-
-
-// 	userIdKey = "userId"
-// 	bizLogin  = "login"
-
-
-
-// type UserHandler struct {
-// 	svc              service.UserService
-// 	codeSvc          service.CodeService
-// 	emailRegexExp    *regexp.Regexp
-// 	passwordRegexExp *regexp.Regexp
-// 	ijwt.Handler
-// }
-
-// func NewUserHandler(svc service.UserService,
-// 	codeSvc service.CodeService, jwthdl ijwt.Handler) *UserHandler {
-// 	return &UserHandler{
-// 		svc:              svc,
-// 		codeSvc:          codeSvc,
-// 		emailRegexExp:    regexp.MustCompile(emailRegexPattern, regexp.None),
-// 		passwordRegexExp: regexp.MustCompile(passwordRegexPattern, regexp.None),
-// 		Handler:          jwthdl,
-// 	}
-// }
 
 // func (c *UserHandler) RegisterRoutes(server *gin.Engine) {
 // 	// 直接注册
@@ -211,12 +185,6 @@ func Login(ctx *gin.Context) {
 // 	}
 // }
 
-// type SignUpReq struct {
-// 	Email           string `json:"email"`
-// 	Password        string `json:"password"`
-// 	ConfirmPassword string `json:"confirmPassword"`
-// }
-
 
 // // LoginJWT 用户登录接口，使用的是 JWT，如果你想要测试 JWT，就启用这个
 // func (c *UserHandler) LoginJWT(ctx *gin.Context) {
@@ -254,37 +222,6 @@ func Login(ctx *gin.Context) {
 // 	ctx.JSON(http.StatusOK, Result{
 // 		Msg: "OK",
 // 	})
-// }
-
-// // Login 用户登录接口
-// func (c *UserHandler) Login(ctx *gin.Context) {
-// 	type LoginReq struct {
-// 		Email    string `json:"email"`
-// 		Password string `json:"password"`
-// 	}
-
-// 	var req LoginReq
-// 	// 当我们调用 Bind 方法的时候，如果有问题，Bind 方法已经直接写响应回去了
-// 	if err := ctx.Bind(&req); err != nil {
-// 		return
-// 	}
-// 	u, err := c.svc.Login(ctx.Request.Context(), req.Email, req.Password)
-// 	if err == service.ErrInvalidUserOrPassword {
-// 		ctx.String(http.StatusOK, "用户名或者密码不正确，请重试")
-// 		return
-// 	}
-// 	sess := sessions.Default(ctx)
-// 	sess.Set(userIdKey, u.Id)
-// 	sess.Options(sessions.Options{
-// 		// 60 秒过期
-// 		MaxAge: 60,
-// 	})
-// 	err = sess.Save()
-// 	if err != nil {
-// 		ctx.String(http.StatusOK, "服务器异常")
-// 		return
-// 	}
-// 	ctx.String(http.StatusOK, "登录成功")
 // }
 
 // // Edit 用户编译信息

@@ -1,20 +1,6 @@
 package biz
 
 
-// // 领域模型
-// type UserDO struct {
-// 	gorm.Model
-// 	Mobile   string     `gorm:"idx_mobile;unique;type:varchar(11);not null"`
-// 	Password string     `gorm:"type:varchar(64);not null"`
-// 	NickName string     `gorm:"type:varchar(20)"`
-// 	Birthday *time.Time `gorm:"type:datetime"`
-// 	Gender   string     `gorm:"column:gender;type:varchar(6);default:male;comment 'female表示女，male表示男'"`
-// 	Role     int        `gorm:"column:role;type:int;default:1;comment '1表示普通用户，2表示管理员'"`
-// }
-
-// func (u *UserDO) TableName() string {
-// 	return "user"
-// }
 
 
 // type UserDOList struct {
@@ -44,18 +30,6 @@ package biz
 // 	Update(ctx context.Context, user *UserDO) error
 // }
 
-/*
 
-命名很烦恼
-	Insert、Create、Add
-	Find、Get
-
-有数据访问，一定要有 error
-
-参数最好有 ctx
-
-涉及外键，很难评价
-
-*/
 
 

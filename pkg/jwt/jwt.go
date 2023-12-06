@@ -13,7 +13,7 @@ type Auth2Claims struct {
 }
 
 
-// 生成
+// 生成 
 func GenerateAuth2Token(identity int, field string, duration time.Duration, secretKey string) (string, error) {
 
 	claims := &Auth2Claims{

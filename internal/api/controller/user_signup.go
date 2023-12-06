@@ -2,9 +2,11 @@ package controller
 
 import (
 	"context"
+	"errors"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/sjxiang/webook-backend/internal/xerr"
 	"github.com/sjxiang/webook-backend/pkg/util"
 )
 
@@ -17,7 +19,7 @@ type signupReq struct {
 
 
 func (controller *Controller) Signup(ctx *gin.Context) {
-	// fetch needed param
+	// fetch payload
 	var req signupReq
 	if err := ctx.ShouldBindJSON(&req); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{
@@ -44,30 +46,21 @@ func (controller *Controller) Signup(ctx *gin.Context) {
 	// biz handle
 	err := controller.uc.Register(context.Background(), req.Email, req.Password)
 	if err != nil {
+		if errors.Is(err, xerr.UserDuplicateEmail) {
+			ctx.JSON(http.StatusBadRequest, gin.H{
+				"message": "邮箱冲突",
+			})
+			return
+		}
+
+		controller.logger.Errorf("系统异常", "biz", err)
 		ctx.JSON(http.StatusInternalServerError, gin.H{
-			"message": "系统异常_"+err.Error(),
+			"message": "系统异常",
 		})
 		return
 	}
 
+
 	// feedback
 	ctx.JSON(http.StatusOK, gin.H{"message": "注册成功"})
 }
-
-
-// 	if err == service.ErrUserDuplicateEmail {
-// 		return Result{
-// 			Code: errs.UserDuplicateEmail,
-// 			Msg:  "邮箱冲突",
-// 		}, err
-// 	}
-// 	if err != nil {
-// 		return Result{
-// 			Code: errs.UserInternalServerError,
-// 			Msg:  "系统错误",
-// 		}, err
-// 	}
-// 	return Result{
-// 		Msg: "OK",
-// 	}, nil
-// }
