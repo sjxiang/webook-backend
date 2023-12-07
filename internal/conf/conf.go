@@ -31,7 +31,8 @@ type Config struct {
 	ServerPort         string `env:"WEBOOK_SERVER_PORT" envDefault:"8001"`
 	ServerMode         string `env:"WEBOOK_SERVER_MODE" envDefault:"debug"`
 	SecretKey          string `env:"WEBOOK_SECRET_KEY" envDefault:"8xEMrWkBARcDDYQ"`
-   
+	RandowKey          string `env:"WEBOOK_RANDOM_KEY" envDefault:"NKFEkZRNUoVNlobEvMPPIGNWZFsMtkve"`
+
 	// storage config
 	MySQLAddr        string `env:"WEBOOK_MYSQL_ADDR" envDefault:"localhost"`
 	MySQLPort        string `env:"WEBOOK_MYSQL_PORT" envDefault:"3306"`
@@ -85,6 +86,10 @@ func getConfig() (*Config, error) {
 
 func (c *Config) GetSecretKey() string {
 	return c.SecretKey
+}
+
+func (c *Config) GetRamdonKey() string {
+	return c.RandowKey
 }
 
 func (c *Config) GetMySQLAddr() string {

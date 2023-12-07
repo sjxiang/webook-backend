@@ -39,11 +39,11 @@ func (r *Router) RegisterRouters(engine *gin.Engine, secret string) {
 	routerGroup := engine.Group("/api/v1")
 	userGroup := routerGroup.Group("/user")
 
+	// session + cookie 认证
 	{
 		// userGroup.Use(middleware.NewSessionLoginMiddlewareBuilder().IgnorePaths("/api/v1/user/signup", "/api/v1/user/login").Build())
 		userGroup.POST("/signup", r.Controller.Signup)
 		userGroup.POST("/login", r.Controller.Login)
-		// session + cookie 认证
 		// 中间件顺序，不要乱
 		userGroup.Use(middleware.NewSessionLoginMiddlewareBuilder().Build())
 		userGroup.POST("/profile", r.Controller.Profile)
@@ -56,5 +56,9 @@ func (r *Router) RegisterRouters(engine *gin.Engine, secret string) {
 	otherUserGroup := otherRouterGroup.Group("/user")
 	
 	// jwt 认证
-	otherUserGroup.POST("/signup", nil)
+	{
+		otherRouterGroup.Use(middleware.JwtAuthMiddleware(r.Controller.ExportTokenMaker()))
+		otherUserGroup.POST("/signup", nil)
+	}
+
 }

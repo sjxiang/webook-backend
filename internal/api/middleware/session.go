@@ -33,6 +33,20 @@ func Sessions(name string, store Store) gin.HandlerFunc {
 	}
 }
 
-这个仓库就是对 http.Cookie 的封装，更友好
+这个仓库就是对 cookie 的封装，更友好
+
+// 设置 cookie
+ctx.SetCookie(
+	"uid", 1,     // kv 键值对
+	86400,        // maxAge，有效时间，单位：秒
+	"/",          // path，存放目录
+	"localhost",  // domain，从属的域名
+	false,        // secure，是否只能通过 https 访问；实际中，考虑敏感信息，则设为 true
+	true,         // httpOnly，是否允许别人通过 js 获取自己的 cookie
+)
+
+// 获取 cookie
+uid, err := ctx.Cookie("uid")
+
 
 */

@@ -14,6 +14,7 @@ import (
 	"github.com/sjxiang/webook-backend/pkg/driver/mysql"
 	"github.com/sjxiang/webook-backend/pkg/driver/redis"
 	"github.com/sjxiang/webook-backend/pkg/logger"
+	"github.com/sjxiang/webook-backend/pkg/token"
 )
 
 
@@ -33,11 +34,21 @@ func initCache(globalConfig *conf.Config, logger *zap.SugaredLogger) *cache.Cach
 	return cache.NewCache(redisDriver, logger)
 }
 
+func initTokenMaker(globalConfig *conf.Config, logger *zap.SugaredLogger) token.Maker {
+	tokenMaker, err := token.NewJWTMaker(globalConfig.GetRamdonKey())
+	if err != nil {
+		logger.Errorw("Error in startup, tokenMaker init failed.")
+	}
+	return tokenMaker
+}
 
 func initServer() (*Server, error) {
 	globalConfig := conf.GetInstance()
 	engine := gin.Default()
 	sugaredLogger := logger.NewSugardLogger()
+
+	// init token
+	tokenMaker := initTokenMaker(globalConfig, sugaredLogger)
 
 	// init storage & cache
 	storage := initStorage(globalConfig, sugaredLogger)
@@ -49,7 +60,7 @@ func initServer() (*Server, error) {
 	uc := biz.NewUserUsecase(ur, sugaredLogger)
 	
 	// init controller
-	c := controller.NewControllerForBackend(uc, sugaredLogger)
+	c := controller.NewControllerForBackend(uc, tokenMaker, sugaredLogger)
 
 	router := router.NewRouter(c)
 	server := NewServer(globalConfig, engine, router, sugaredLogger)
