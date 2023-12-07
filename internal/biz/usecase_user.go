@@ -38,6 +38,7 @@ func (uc *UserUsecase) Register(ctx context.Context, email, password string) err
 func (uc *UserUsecase) Login(ctx context.Context, email, password string) (*User, error) {
 	// 查找邮箱
 	u , err := uc.ur.GetUserByEmail(ctx, email)
+	uc.logger.Info("uc", u, email)
 	if err != nil {
 		return nil, err
 	}
@@ -50,21 +51,22 @@ func (uc *UserUsecase) Login(ctx context.Context, email, password string) (*User
 	return u, nil
 }
 
-func (uc *UserUsecase) Profile(ctx context.Context, id int64) (*User, error) {
+func (uc *UserUsecase) Profile(ctx context.Context, uid int64) (*User, error) {
 	// 查找用户
-	u , err := uc.ur.GetUserByID(ctx, id)
+	u , err := uc.ur.GetUserByID(ctx, uid)
 	if err != nil {
 		return nil, err
 	}
 	return u, nil
 }
 
-func (uc *UserUsecase) Edit(ctx context.Context, uid int64, username, intro string, birthday int64) error {
+func (uc *UserUsecase) Edit(ctx context.Context, uid int64, username, intro string, birthday int64, avatar string) error {
 	user := &User{
 		ID:       uid,
 		NickName: username,
 		Birthday: birthday,
 		Intro:    intro,
+		Avatar:   avatar,
 	}
 	return uc.ur.UpdateByID(ctx, user)
 }

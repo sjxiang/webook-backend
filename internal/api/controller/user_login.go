@@ -55,6 +55,9 @@ func (controller *Controller) Login(ctx *gin.Context) {
 		return
 	}
 
+	// 日志成对 Ignored key without a value. 
+	controller.logger.Infow("用户登录", "biz", user)
+
 	// 设置 session（把碗掏出来，要饭）
 	s := sessions.Default(ctx)
 	s.Clear()

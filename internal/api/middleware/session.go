@@ -33,4 +33,6 @@ func Sessions(name string, store Store) gin.HandlerFunc {
 	}
 }
 
+这个仓库就是对 http.Cookie 的封装，更友好
+
 */

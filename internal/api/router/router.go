@@ -47,6 +47,7 @@ func (r *Router) RegisterRouters(engine *gin.Engine, secret string) {
 		// 中间件顺序，不要乱
 		userGroup.Use(middleware.NewSessionLoginMiddlewareBuilder().Build())
 		userGroup.POST("/profile", r.Controller.Profile)
+		userGroup.POST("/edit", r.Controller.Edit)
 	}
 	
 

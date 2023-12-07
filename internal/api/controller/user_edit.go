@@ -43,7 +43,7 @@ func (controller *Controller) Edit(ctx *gin.Context) {
 	// fetch some params
 	uid := ctx.MustGet("user_id").(int64)
 
-	err = controller.uc.Edit(context.Background(), uid, req.NickName, req.Intro, birthday.Unix())
+	err = controller.uc.Edit(context.Background(), uid, req.NickName, req.Intro, birthday.Unix(), req.Avatar)
 	if err != nil {
 		controller.logger.Errorf("系统异常", "biz", err)
 		ctx.JSON(http.StatusInternalServerError, gin.H{

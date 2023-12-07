@@ -13,6 +13,8 @@ import (
 func (controller *Controller) Profile(ctx *gin.Context) {
 	uid := ctx.MustGet("user_id").(int64)
 
+	controller.logger.Info("用户详情资料", "biz", uid)
+	
 	user, err := controller.uc.Profile(context.TODO(), uid)
 	if err != nil {
 		if errors.Is(err, xerr.UserNotFound) {

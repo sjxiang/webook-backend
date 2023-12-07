@@ -9,7 +9,7 @@ import (
 	"gorm.io/gorm"
 
 	"github.com/sjxiang/webook-backend/internal/conf"
-	// "github.com/sjxiang/webook-backend/internal/data"
+	"github.com/sjxiang/webook-backend/internal/data"
 )
 
 const RETRY_TIMES = 6
@@ -83,7 +83,7 @@ func NewMySQLConnection(config *MySQLConfig, logger *zap.SugaredLogger) (*gorm.D
 		return nil, err
 	}
 
-	// db.AutoMigrate(&data.UserM{})
+	db.AutoMigrate(&data.UserM{})
 
 	logger.Infow("connected with db", "db", config)
 

@@ -44,7 +44,7 @@ func (impl *SessionLoginMiddlewareBuilder) Build() gin.HandlerFunc {
 			return
 		}
 
-		ctx.Set("user_id", uid)
+		ctx.Set("user_id", uid.(int64))
 		ctx.Next()
 	}
 }

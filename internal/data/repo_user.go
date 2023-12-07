@@ -54,6 +54,7 @@ func (ur *userRepo) GetUserByEmail(ctx context.Context, email string) (*biz.User
 	}
 
 	return &biz.User{
+		ID:       u.ID,
 		Email:    u.Email,
 		Password: u.Password,
 	}, nil
@@ -61,7 +62,7 @@ func (ur *userRepo) GetUserByEmail(ctx context.Context, email string) (*biz.User
 
 func (ur *userRepo) GetUserByID(ctx context.Context, id int64) (*biz.User, error) {
 	u := new(UserM)
-	err := ur.storage.WithContext(ctx).Where("id = ?", id).First(u).Error
+	err := ur.storage.WithContext(ctx).First(u, "id = ?", id).Error
 
 	// 检查 ErrRecordNotFound 错误
 	if err != nil && errors.Is(err, gorm.ErrRecordNotFound) {
@@ -71,12 +72,13 @@ func (ur *userRepo) GetUserByID(ctx context.Context, id int64) (*biz.User, error
 		return nil, err
 	}
 
+	// if u.Username 
 	return &biz.User{
-		NickName: *u.Username,
+		// NickName: *u.Username,
 		Email:    u.Email,
-		// Password: u.Password,
 		Intro:    u.Intro,
 		Birthday: u.Birthday,
+		Avatar:   u.Avatar.String,
 	}, nil
 }
 
@@ -88,8 +90,9 @@ func (ur *userRepo)UpdateByID(ctx context.Context, user *biz.User) error {
 	return ur.storage.WithContext(ctx).Model(u).Where("id = ?", user.ID).
 		Updates(map[string]any{
 			"username": user.NickName,
-			"nickname": user.Birthday,
+			"birthday": user.Birthday,
 			"intro":    user.Intro,
+			"avatar":   user.Avatar,
 		}).Error
 }
 
