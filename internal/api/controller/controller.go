@@ -15,6 +15,7 @@ type Controller struct {
 	logger     *zap.SugaredLogger
 }
 
+// 没活了，只能将就用吧
 func (controller *Controller) ExportTokenMaker() token.Maker {
 	return controller.tokenMaker
 }

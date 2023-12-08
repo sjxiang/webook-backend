@@ -57,8 +57,12 @@ func (uc *UserUsecase) Profile(ctx context.Context, uid int64) (*User, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	// birthday 做下特殊处理
+	
 	return u, nil
 }
+//  u.Birthday.Format(time.DateOnly)
 
 func (uc *UserUsecase) Edit(ctx context.Context, uid int64, username, intro string, birthday int64, avatar string) error {
 	user := &User{

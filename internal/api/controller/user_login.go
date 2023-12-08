@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"net/http"
+	"time"
 
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
@@ -55,13 +56,11 @@ func (controller *Controller) Login(ctx *gin.Context) {
 		return
 	}
 
-	// 日志成对 Ignored key without a value. 
-	controller.logger.Infow("用户登录", "biz", user)
-
-	// 设置 session（把碗掏出来，要饭）
+	// 设置 session
 	s := sessions.Default(ctx)
 	s.Clear()
 	s.Set("user_id", user.ID)
+	s.Set("last_time", time.Now())
 	s.Save()
 
 	// feedback
@@ -69,29 +68,6 @@ func (controller *Controller) Login(ctx *gin.Context) {
 }
 
 
-
-// func (c *UserHandler) RegisterRoutes(server *gin.Engine) {
-// 	// 直接注册
-// 	//server.POST("/users/signup", c.SignUp)
-// 	//server.POST("/users/login", c.Login)
-// 	//server.POST("/users/edit", c.Edit)
-// 	//server.GET("/users/profile", c.Profile)
-
-// 	// 分组注册
-// 	ug := server.Group("/users")
-// 	ug.POST("/signup", ginx.WrapReq[SignUpReq](c.SignUp))
-// 	// session 机制
-// 	//ug.POST("/login", c.Login)
-// 	// JWT 机制
-// 	ug.POST("/login", c.LoginJWT)
-// 	ug.POST("/logout", c.Logout)
-// 	ug.POST("/edit", c.Edit)
-// 	//ug.GET("/profile", c.Profile)
-// 	ug.GET("/profile", c.ProfileJWT)
-// 	ug.POST("/login_sms/code/send", c.SendSMSLoginCode)
-// 	ug.POST("/login_sms", c.LoginSMS)
-// 	ug.POST("/refresh_token", c.RefreshToken)
-// }
 
 // func (c *UserHandler) RefreshToken(ctx *gin.Context) {
 // 	// 假定长 token 也放在这里

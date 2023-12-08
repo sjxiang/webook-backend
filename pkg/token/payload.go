@@ -29,7 +29,7 @@ func NewPayload(id int64, email string, duration time.Duration) *Payload {
 }
 
 // 校验 payload 字段是否有效（细分下是不是过期了？还是其它问题导致的无效）
-// jwt.ParseWithClaims 调用时，内部使用
+// 等到 jwt.ParseWithClaims 调用时，内部使用
 func (payload *Payload) Valid() error {
 	if time.Now().After(payload.ExpiredAt) {
 		return ErrExpiredToken

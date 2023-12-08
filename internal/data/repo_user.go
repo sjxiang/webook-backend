@@ -21,12 +21,12 @@ func (ur *userRepo) CreateUser(ctx context.Context, u *biz.User) error {
 
 	err := ur.storage.WithContext(ctx).Create(user).Error
 	if err != nil {
-		if mysqlErr, ok := err.(*mysql.MySQLError); ok {
-			// 违反唯一索引约束 Error 1062 (23000): Duplicate entry
-			const uniqueViolation uint16 = 1062  
-			if mysqlErr.Number == uniqueViolation {
-				return xerr.UserDuplicateEmail
-			}
+		// 违反唯一索引约束 Error 1062 (23000): Duplicate entry
+		const uniqueViolation uint16 = 1062  
+
+		mysqlErr, ok := err.(*mysql.MySQLError)
+		if ok && mysqlErr.Number == uniqueViolation {
+			return xerr.UserDuplicateEmail
 		}
 		
 		// 其它
@@ -37,19 +37,15 @@ func (ur *userRepo) CreateUser(ctx context.Context, u *biz.User) error {
 }
 
 func (ur *userRepo) GetUserByEmail(ctx context.Context, email string) (*biz.User, error) {
-	
-	// var u UserM
-	// panic _ invalid value, should be pointer to struct or slice
-	// 期望将查询结果存储在一个有效的结构体指针中，nil
 
 	u := new(UserM)
 	err := ur.storage.WithContext(ctx).Where("email = ?", email).First(u).Error
 
-	// 检查 ErrRecordNotFound 错误
-	if err != nil && errors.Is(err, gorm.ErrRecordNotFound) {
-		return nil, xerr.InvalidUserOrPassword
-	}
 	if err != nil {
+		// 检查 ErrRecordNotFound 错误
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, xerr.InvalidUserOrPassword
+		}
 		return nil, err
 	}
 
@@ -64,11 +60,12 @@ func (ur *userRepo) GetUserByID(ctx context.Context, id int64) (*biz.User, error
 	u := new(UserM)
 	err := ur.storage.WithContext(ctx).First(u, "id = ?", id).Error
 
-	// 检查 ErrRecordNotFound 错误
-	if err != nil && errors.Is(err, gorm.ErrRecordNotFound) {
-		return nil, xerr.UserNotFound
-	}
 	if err != nil {
+		// 检查 ErrRecordNotFound 错误
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, xerr.UserNotFound
+		}
+		
 		return nil, err
 	}
 
@@ -157,18 +154,3 @@ func (u *UserM) TableName() string {
 
 // 	return users, nil
 // }
-
-// func (u *user) GetByMobile(ctx context.Context, mobile string) (*biz.UserDO, error) {
-// 	var user biz.UserDO
-// 	err := u.db.WithContext(ctx).Where("mobile = ?", mobile).First(&user).Error
-// 	if err != nil {
-// 		if errors.Is(err, gorm.ErrRecordNotFound) {
-// 			return nil, errno.ErrUserNotFound.WithMessage(err.Error())
-// 		}
-// 		return nil, errno.ErrDatabaseFail.WithMessage(err.Error())
-// 	}
-// 	return &user, err
-// }
-
-
-

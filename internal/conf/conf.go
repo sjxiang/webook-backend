@@ -44,7 +44,7 @@ type Config struct {
 	// cache config
 	RedisAddr     string `env:"WEBOOK_REDIS_ADDR" envDefault:"localhost"`
 	RedisPort     string `env:"WEBOOK_REDIS_PORT" envDefault:"6379"`
-	RedisPassword string `env:"WEBOOK_REDIS_PASSWORD" envDefault:"illa2022"`
+	RedisPassword string `env:"WEBOOK_REDIS_PASSWORD" envDefault:""`
 	RedisDatabase int    `env:"WEBOOK_REDIS_DATABASE" envDefault:"0"`
 
 	// oss config

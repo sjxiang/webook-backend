@@ -10,9 +10,6 @@ import (
 
 
 type userRepo struct {
-	// storage
-	// cache
-	// drive
 	storage *gorm.DB
 	cache   *redis.Client
 	logger  *zap.SugaredLogger

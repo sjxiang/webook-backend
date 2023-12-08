@@ -1,6 +1,8 @@
 package router
 
 import (
+	"github.com/gin-contrib/sessions"
+	"github.com/gin-contrib/sessions/cookie"
 	"github.com/gin-gonic/gin"
 	"github.com/sjxiang/webook-backend/internal/api/controller"
 	"github.com/sjxiang/webook-backend/internal/api/middleware"
@@ -18,28 +20,37 @@ func NewRouter(controller *controller.Controller) *Router {
 
 
 func (r *Router) RegisterRouters(engine *gin.Engine, secret string) {
-	// config
-	engine.UseRawPath = true
-	// init middleware
-	engine.Use(middleware.Session(secret))
-	engine.Use(middleware.CORS())
-	
+	// 404
 	engine.NoRoute(func(c *gin.Context) {
 		c.Data(404, "text/plain", []byte("404 page not found"))
 		c.Abort()
 	})
-	
 	engine.NoMethod(func(c *gin.Context) {
 		c.Data(405, "text/plain", []byte("Method Not Allowed"))
 		c.Abort()
 	})
 
+	// config
+	engine.UseRawPath = true
+	// init middleware
+	engine.Use(middleware.CORS())
+	
 
-	// init route
+	// init v1 route
 	routerGroup := engine.Group("/api/v1")
 	userGroup := routerGroup.Group("/user")
-
-	// session + cookie 认证
+	
+	// init session
+	store := cookie.NewStore([]byte(secret))
+	// Also set Secure: true if using SSL, you should though
+	store.Options(sessions.Options{
+			HttpOnly: true, 
+			MaxAge:   7 * 86400,  // 7 天
+			Path:     "/",
+		})
+	userGroup.Use(sessions.Sessions("gin-session", store))
+	
+	// Session + Cookie
 	{
 		// userGroup.Use(middleware.NewSessionLoginMiddlewareBuilder().IgnorePaths("/api/v1/user/signup", "/api/v1/user/login").Build())
 		userGroup.POST("/signup", r.Controller.Signup)
@@ -48,14 +59,15 @@ func (r *Router) RegisterRouters(engine *gin.Engine, secret string) {
 		userGroup.Use(middleware.NewSessionLoginMiddlewareBuilder().Build())
 		userGroup.POST("/profile", r.Controller.Profile)
 		userGroup.POST("/edit", r.Controller.Edit)
+		userGroup.POST("/logout", r.Controller.Logout)
 	}
 	
 
-	// init route
+	// init v2 route
 	otherRouterGroup := engine.Group("/api/v2")
 	otherUserGroup := otherRouterGroup.Group("/user")
 	
-	// jwt 认证
+	// JWT
 	{
 		otherRouterGroup.Use(middleware.JwtAuthMiddleware(r.Controller.ExportTokenMaker()))
 		otherUserGroup.POST("/signup", nil)
