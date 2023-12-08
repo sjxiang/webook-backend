@@ -45,6 +45,6 @@ type Claims interface {
 	Valid() error
 }
 
-实现 jwt.Claims 接口
+v4 需要实现 jwt.Claims 接口
 
  */

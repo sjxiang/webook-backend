@@ -58,7 +58,7 @@ func (uc *UserUsecase) Profile(ctx context.Context, uid int64) (*User, error) {
 		return nil, err
 	}
 
-	// birthday 做下特殊处理
+	// u.Birthday 做下特殊处理
 	
 	return u, nil
 }

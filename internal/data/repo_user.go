@@ -69,9 +69,9 @@ func (ur *userRepo) GetUserByID(ctx context.Context, id int64) (*biz.User, error
 		return nil, err
 	}
 
-	// if u.Username 
 	return &biz.User{
-		// NickName: *u.Username,
+		ID:       u.ID,
+		// NickName: *u.Username,  // 需要特殊处理，指针很烦
 		Email:    u.Email,
 		Intro:    u.Intro,
 		Birthday: u.Birthday,

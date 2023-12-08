@@ -23,7 +23,9 @@ func CORS() gin.HandlerFunc {
 		"Cookie", 
 		"Authorization",
 	}
-	
+	// 把 jwt 放在 header，而不是 body 中，需要暴露（尽管真实返回了，但浏览器不给前端，所以这个设置是给浏览器看的） 
+	config.ExposeHeaders = []string{"x-jwt-token"}
+
 	// 哪些来源是允许的
 	// 写法 1
 	// config.AllowOrigins = []string{"http://localhost:8080", "https://www.yourcompany.com"}

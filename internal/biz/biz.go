@@ -4,7 +4,6 @@ import "go.uber.org/zap"
 
 
 type UserUsecase struct {
-	// token
 	ur     UserRepo
 	logger *zap.SugaredLogger
 }
@@ -39,6 +38,7 @@ type SocialUsecase struct {
 // 	log *log.Helper
 // }
 
+
 // type Profile struct {
 // 	ID        uint
 // 	Username  string
@@ -47,8 +47,3 @@ type SocialUsecase struct {
 // 	Following bool
 // }
 
-// // NewUserUsecase 用户领域构造方法
-// func NewUserUsecase(ur UserRepo,
-// 	pr ProfileRepo, logger log.Logger, jwtc *conf.JWT) *UserUsecase {
-// 	return &UserUsecase{ur: ur, pr: pr, jwtc: jwtc, log: log.NewHelper(logger)}
-// }

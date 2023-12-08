@@ -64,13 +64,21 @@ func (r *Router) RegisterRouters(engine *gin.Engine, secret string) {
 	
 
 	// init v2 route
-	otherRouterGroup := engine.Group("/api/v2")
-	otherUserGroup := otherRouterGroup.Group("/user")
+	v2RouterGroup := engine.Group("/api/v2")
+	otherUserGroup := v2RouterGroup.Group("/user")
+	otherUserGroup.Use(middleware.JwtAuthMiddleware(r.Controller.ExportTokenMaker()))
 	
 	// JWT
 	{
-		otherRouterGroup.Use(middleware.JwtAuthMiddleware(r.Controller.ExportTokenMaker()))
-		otherUserGroup.POST("/signup", nil)
+		otherUserGroup.POST("/signup", r.Controller.Signup)
+		otherUserGroup.POST("/login", r.Controller.LoginJWT)
+		
+		// 中间件顺序，不要乱
+		otherUserGroup.Use(middleware.JwtAuthMiddleware(r.Controller.ExportTokenMaker()))
+		
+		otherUserGroup.POST("/profile", r.Controller.ProfileJWT)
+		otherUserGroup.POST("/edit", r.Controller.EditJWT)
+		
 	}
 
 }

@@ -1,10 +1,13 @@
 package middleware
 
 import (
+	"errors"
+	"fmt"
 	"net/http"
 	"strings"
 
 	"github.com/gin-gonic/gin"
+	"go.uber.org/zap"
 	"github.com/sjxiang/webook-backend/pkg/token"
 )
 
@@ -17,30 +20,27 @@ const (
 
 func JwtAuthMiddleware(tokenMaker token.Maker) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		authorizationHeader := ctx.GetHeader(authorizationHeaderKey)
+		authorizationHeader := ctx.GetHeader("Authorization")
 
 		if len(authorizationHeader) == 0 {
-			// err := errors.New("authorization header is not provided")
 			ctx.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
-				"message": "",
+				"message": "未提供 authorization header",
 			})
 			return
 		}
 
 		fields := strings.Fields(authorizationHeader)
 		if len(fields) < 2 {
-			// err := errors.New("invalid authorization header format")
 			ctx.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
-				"message": "",
+				"message": "无效 authorization header 格式",
 			})
 			return
 		}
 
 		authorizationType := strings.ToLower(fields[0])
 		if authorizationType != authorizationTypeBearer {
-			// err := fmt.Errorf("unsupported authorization type %s", authorizationType)
 			ctx.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
-				"message": "",
+				"message": fmt.Sprintf("不支持 authorization 类型 %s", authorizationType),
 			})
 			return
 		}
@@ -48,13 +48,26 @@ func JwtAuthMiddleware(tokenMaker token.Maker) gin.HandlerFunc {
 		accessToken := fields[1]
 		payload, err := tokenMaker.VerifyToken(accessToken)
 		if err != nil {
+			if errors.Is(err, token.ErrExpiredToken) {
+				ctx.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
+					"message": "token 过期",
+				})
+			}
+			if errors.Is(err, token.ErrInvalidToken) {
+				ctx.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
+					"message": "token 被篡改，无效",
+				})
+				return
+			}
+
+			zap.S().Error("middleware", "校验 token 异常", err.Error())
 			ctx.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
-				"message": "",
+				"message": err,
 			})
 			return
 		}
 
-		ctx.Set(authorizationPayloadKey, payload)
+		ctx.Set("authorization_payload", payload)
 		ctx.Next()
 	}
 }
