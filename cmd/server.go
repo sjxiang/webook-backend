@@ -1,14 +1,15 @@
 package main
 
-
 import (
 	"os"
 
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
 
+	"github.com/sjxiang/webook-backend/internal/api/middleware"
 	"github.com/sjxiang/webook-backend/internal/api/router"
 	"github.com/sjxiang/webook-backend/internal/conf"
+	"github.com/sjxiang/webook-backend/pkg/limiter"
 )
 
 
@@ -18,15 +19,17 @@ type Server struct {
 	router  *router.Router
 	logger  *zap.SugaredLogger
 	config  *conf.Config
+	limiter  limiter.Limiter
 }
 
 
-func NewServer(config *conf.Config, engine *gin.Engine, router *router.Router, logger *zap.SugaredLogger) *Server {
+func NewServer(config *conf.Config, engine *gin.Engine, router *router.Router, logger *zap.SugaredLogger, limiter limiter.Limiter) *Server {
 	return &Server{
-		engine: engine,
-		config: config,
-		router: router,
-		logger: logger,
+		engine:  engine,
+		config:  config,
+		router:  router,
+		logger:  logger,
+		limiter: limiter,
 	}
 }
 
@@ -36,6 +39,10 @@ func (server *Server) Start() {
 	
 	// init
 	gin.SetMode(server.config.ServerMode)
+
+	// init global middleware
+	server.engine.Use(middleware.CORS())
+	// server.engine.Use(middleware.NewRateLimiteBuilder().Build())
 
 	// init route
 	server.router.RegisterRouters(server.engine, secret)

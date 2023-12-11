@@ -8,7 +8,7 @@ import (
 	"github.com/gin-contrib/cors"
 )
 
-
+// 全局
 
 // Cors 跨域配置
 func CORS() gin.HandlerFunc {

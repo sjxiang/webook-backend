@@ -62,6 +62,9 @@ type Config struct {
 	IllaGoogleSheetsClientID     string `env:"ILLA_GS_CLIENT_ID" envDefault:""`
 	IllaGoogleSheetsClientSecret string `env:"ILLA_GS_CLIENT_SECRET" envDefault:""`
 	IllaGoogleSheetsRedirectURI  string `env:"ILLA_GS_REDIRECT_URI" envDefault:""`
+
+	// rate limit
+
 }
 
 func getConfig() (*Config, error) {

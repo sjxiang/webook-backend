@@ -3,6 +3,7 @@ package util
 import (
 	"fmt"
 	"unicode"
+	"errors"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -46,10 +47,9 @@ func ValidatePasswordV1(password string) (minSize, digit, special, letter bool) 
 	return
 }
 
-
-// 不可逆
 // HashPassword returns the bcrypt hash of the password
 func HashPassword(password string) (string, error) {
+	// 不可逆
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 	if err != nil {
 		return "", fmt.Errorf("failed to hash password: %w", err)
@@ -60,4 +60,20 @@ func HashPassword(password string) (string, error) {
 // CheckPassword checks if the provided password is correct or not
 func CheckPassword(password string, hashedPassword string) error {
 	return bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(password))
+}
+
+func PasswordMatches(hash, password string) (bool, error) {
+	err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(password))
+	if err != nil {
+		switch {
+		// 密码和哈希不匹配
+		case errors.Is(err, bcrypt.ErrMismatchedHashAndPassword):
+			return false, nil
+		// 其它错误
+		default:
+			return false, err
+		}
+	}
+
+	return true, nil
 }

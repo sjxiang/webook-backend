@@ -14,10 +14,12 @@ import (
 const JWT_TOKEN_DEFAULT_EXIPRED_PERIOD = time.Minute * 30
 
 type Auth2Claims struct {
+	// 接口要实现方法太多，还是组合吧！
+	jwt.RegisteredClaims   
+
+	// 不要放敏感数据
 	Identity  int 
 	Field     string
-
-	jwt.RegisteredClaims   
 }
 
 /*
@@ -84,7 +86,7 @@ type authHeader struct {
 	AccessToken string `header:"Authorization" binding:"required,min=7"`  // 前缀 "Bearer "
 }
 
-func RemoteJWTAuth(secretKey string) gin.HandlerFunc {
+func JWTAuth(secretKey string) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		// fetch content
 		var req authHeader
@@ -114,19 +116,21 @@ func RemoteJWTAuth(secretKey string) gin.HandlerFunc {
 		// 会话保持
 		expireTime, err := claims.GetExpirationTime()
 		if err != nil {
-			ctx.AbortWithStatus(http.StatusUnauthorized)  // 不大可能发生
+			ctx.AbortWithStatus(http.StatusUnauthorized)  // 拿不到过期时间，不大可能发生
 			return
 		}
 		if expireTime.Before(time.Now()) {
-			ctx.AbortWithStatus(http.StatusUnauthorized)  // 过期了
+			ctx.AbortWithStatus(http.StatusUnauthorized)  // 已经过期
 			return
 		}
-		if expireTime.Sub(time.Now()) < time.Minute*30 {
-			// 续一轮
+		if time.Until(expireTime.Time) < time.Minute*30 {  // 不足 30 min，续一轮
 			zap.S().Info("快过期了，兄嘚")
+			// 创建 token
+			// 返回前端
 		}
 
-		ctx.Set("claims", claims)
+		ctx.Set("auth_claims", claims)
 		ctx.Next()
 	}
 }
+

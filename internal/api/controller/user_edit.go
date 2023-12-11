@@ -78,6 +78,22 @@ func (controller *Controller) EditJWT(ctx *gin.Context) {
 	}
 
 	// fetch some params
+	
+	// claims, exists := ctx.Get("authorization_payload")
+	// if !exists {
+	// 	ctx.JSON(http.StatusInternalServerError, gin.H{
+	// 		"message": "系统异常",
+	// 	})
+	// 	return
+	// }
+	// payload, ok := claims.(*token.Payload)
+	// if !ok {
+	// 	ctx.JSON(http.StatusInternalServerError, gin.H{
+	// 		"message": "系统异常",
+	// 	})
+	// 	return
+	// }
+
 	payload := ctx.MustGet("authorization_payload").(*token.Payload)
 
 	// biz handle

@@ -32,8 +32,6 @@ func (r *Router) RegisterRouters(engine *gin.Engine, secret string) {
 
 	// config
 	engine.UseRawPath = true
-	// init middleware
-	engine.Use(middleware.CORS())
 	
 
 	// init v1 route
