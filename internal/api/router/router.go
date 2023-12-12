@@ -64,7 +64,7 @@ func (r *Router) RegisterRouters(engine *gin.Engine, secret string) {
 	// init v2 route
 	v2RouterGroup := engine.Group("/api/v2")
 	otherUserGroup := v2RouterGroup.Group("/user")
-	otherUserGroup.Use(middleware.JwtAuthMiddleware(r.Controller.ExportTokenMaker()))
+	// otherUserGroup.Use(middleware.JwtAuthMiddleware(r.Controller.ExportTokenMaker()))
 	
 	// JWT
 	{

@@ -60,7 +60,9 @@ func (b *RateLimitBuilder) Build() gin.HandlerFunc {
 		}
 		if limited {
 			log.Println(err)
-			ctx.AbortWithStatus(http.StatusTooManyRequests)
+			ctx.AbortWithStatusJSON(http.StatusTooManyRequests, gin.H{
+				"message": "猴急，慢点",
+			})
 			return
 		}
 		ctx.Next()

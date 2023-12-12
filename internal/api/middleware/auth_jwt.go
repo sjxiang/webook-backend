@@ -52,6 +52,7 @@ func JwtAuthMiddleware(tokenMaker token.Maker) gin.HandlerFunc {
 				ctx.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
 					"message": "token 过期",
 				})
+				return
 			}
 			if errors.Is(err, token.ErrInvalidToken) {
 				ctx.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{

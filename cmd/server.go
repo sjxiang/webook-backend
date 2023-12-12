@@ -42,8 +42,8 @@ func (server *Server) Start() {
 
 	// init global middleware
 	server.engine.Use(middleware.CORS())
-	// server.engine.Use(middleware.NewRateLimiteBuilder().Build())
-
+	server.engine.Use(middleware.NewRateLimiteBuilder(server.limiter).Build())
+	
 	// init route
 	server.router.RegisterRouters(server.engine, secret)
 

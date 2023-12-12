@@ -52,7 +52,7 @@ func initLimiter(globalConfig *conf.Config, logger *zap.SugaredLogger) limiter.L
 	}
 
 	// TODO 配置里面加一个
-	return limiter.NewRedisSlidingWindowLimiter(redisDriver, time.Minute, 1000)
+	return limiter.NewRedisSlidingWindowLimiter(redisDriver, time.Minute, 10)
 }
 
 func initServer() (*Server, error) {

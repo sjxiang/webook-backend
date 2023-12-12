@@ -7,8 +7,9 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
-	"github.com/sjxiang/webook-backend/pkg/util"
 	"go.uber.org/zap"
+	
+	"github.com/sjxiang/webook-backend/pkg/util"
 )
 
 const JWT_TOKEN_DEFAULT_EXIPRED_PERIOD = time.Minute * 30
@@ -19,7 +20,8 @@ type Auth2Claims struct {
 
 	// 不要放敏感数据
 	Identity  int 
-	Field     string
+	// 前端采集足够多的数据，做安全校验
+	UserAgent string
 }
 
 /*
@@ -39,11 +41,11 @@ v5 需要实现这些
 
 
 // 生成 
-func GenerateAuth2Token(identity int, field string, duration time.Duration, secretKey string) (string, error) {
+func GenerateAuth2Token(identity int, userAgent string, duration time.Duration, secretKey string) (string, error) {
 
 	claims := &Auth2Claims{
 		Identity:         identity,
-		Field:            field,
+		UserAgent:        userAgent,
 		RegisteredClaims: jwt.RegisteredClaims{
 			IssuedAt:  &jwt.NumericDate{Time: time.Now()},
 			ExpiresAt: &jwt.NumericDate{Time: time.Now().Add(JWT_TOKEN_DEFAULT_EXIPRED_PERIOD)},
@@ -110,6 +112,11 @@ func JWTAuth(secretKey string) gin.HandlerFunc {
 		claims, err := ExtractAuth2Token(segments[1], secretKey)
 		if err != nil {
 			ctx.AbortWithStatus(http.StatusUnauthorized)  // 格式对，但内容被篡改
+			return
+		}
+
+		if ctx.Request.UserAgent() != claims.UserAgent {
+			ctx.AbortWithStatus(http.StatusUnauthorized)  // 换了一个 User-Agent 可能是攻击者
 			return
 		}
 
