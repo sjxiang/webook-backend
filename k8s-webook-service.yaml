@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: webook-backend
+spec:
+#  ClusterIP
+  type: LoadBalancer
+  selector:
+    app: webook-backend
+  ports:
+    - protocol: TCP
+      name: http
+      port: 81
+      targetPort: 8001

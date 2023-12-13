@@ -1,0 +1,23 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: webook-backend-redis
+  labels:
+    app: webook-backend-redis
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: webook-backend-redis
+  template:
+    metadata:
+      name: webook-backend-redis
+      labels:
+        app: webook-backend-redis
+    spec:
+      containers:
+        - name: webook-backend-redis
+          image: redis:latest
+          imagePullPolicy: IfNotPresent
+      restartPolicy: Always
+      
